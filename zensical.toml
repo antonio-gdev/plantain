@@ -1,0 +1,91 @@
+[project]
+site_name = "Plantain"
+site_description = "Local-first, agent-assisted testing for web interfaces, APIs, OpenAPI contracts, and relational databases."
+docs_dir = "docs"
+site_dir = "site"
+strict = true
+copyright = "Plantain documentation"
+extra_css = ["assets/stylesheets/extra.css"]
+nav = [
+  { "Home" = "index.md" },
+  { "Get started" = [
+    { "Overview" = "get-started/overview.md" },
+    { "Installation" = "get-started/installation.md" },
+    { "Create your first test" = "get-started/first-test.md" },
+    { "Dashboard" = "get-started/dashboard.md" },
+    { "CLI" = "get-started/cli.md" },
+  ] },
+  { "Create tests" = [
+    { "Effective intents" = "testing/effective-intents.md" },
+    { "UI testing" = "testing/ui.md" },
+    { "API testing" = "testing/api.md" },
+    { "Database testing" = "testing/database.md" },
+    { "Cross-system testing" = "testing/cross-system.md" },
+  ] },
+  { "Use the workspace" = [
+    { "Manage tests" = "testing/manage-tests.md" },
+    { "Run tests" = "testing/run-tests.md" },
+    { "Runs and results" = "testing/results.md" },
+  ] },
+  { "Configuration" = [
+    { "Agent" = "configuration/agent.md" },
+    { "Environment values" = "configuration/environments.md" },
+    { "Results and integrations" = "configuration/integrations.md" },
+    { "Network access" = "configuration/network.md" },
+  ] },
+  { "Reference" = [
+    { "Dashboard" = "reference/dashboard.md" },
+    { "CLI" = "reference/cli.md" },
+    { "Generated tests" = "reference/generated-artifacts.md" },
+    { "Activities" = "reference/activities.md" },
+    { "Files and outputs" = "reference/outputs.md" },
+  ] },
+  { "Operations" = [
+    { "Security and privacy" = "operations/security.md" },
+    { "CI/CD" = "operations/ci-cd.md" },
+    { "Troubleshooting" = "operations/troubleshooting.md" },
+    { "FAQ" = "operations/faq.md" },
+  ] },
+]
+
+[project.theme]
+variant = "modern"
+language = "en"
+logo = "assets/images/plantain_logo.png"
+favicon = "assets/images/plantain_favicon.png"
+font = false
+features = [
+  "navigation.tabs",
+  "navigation.sections",
+  "navigation.path",
+  "navigation.top",
+  "navigation.tracking",
+  "toc.follow",
+  "search.highlight",
+  "content.code.copy",
+  "content.tabs.link",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Use light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+primary = "custom"
+accent = "custom"
+toggle.icon = "lucide/sun"
+toggle.name = "Use dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+primary = "custom"
+accent = "custom"
+toggle.icon = "lucide/moon"
+toggle.name = "Follow system preference"
+
+[project.extra]
+generator = false

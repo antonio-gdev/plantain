@@ -1,0 +1,7 @@
+interface:
+  display_name: "Generate API Tests"
+  short_description: "Create schema-grounded API scenarios from intent"
+  default_prompt: "Use $generate-api-tests with my Swagger or OpenAPI URL to create positive, negative, and boundary YAML tests."
+policy:
+  allow_implicit_invocation: true
+

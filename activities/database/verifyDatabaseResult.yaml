@@ -1,0 +1,43 @@
+activity: verifyDatabaseResult
+summary: Assert a chained database result without opening another connection.
+parameters:
+  id:
+    type: string matching ^[A-Za-z][A-Za-z0-9_-]*$
+    required: true
+  actual:
+    type: any YAML/chained value
+    required: true
+    description: Use the complete ${queryId} envelope when completeness matters; ${queryId.result} is data-only and cannot convey truncation.
+  expected:
+    type: any YAML value
+    required: true
+  matchMode:
+    type: contains, exact, or unorderedContains
+    default: contains
+    description: contains checks ordered prefixes/subsets; exact checks type and complete shape; unorderedContains matches partial expected rows in any order while consuming each actual row once.
+result:
+  success: boolean
+  matchMode: effective matching mode
+  matchedRows: expected sequence length or 1 for a scalar/mapping expectation
+operationTrace:
+  target: Effective database-result match mode.
+  input: Bounded sanitized actual value or chained query envelope.
+  expected: Bounded sanitized expected value.
+  actual: Match outcome and matched-row count.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Structural mismatch diagnostics never echo rejected database values.
+security:
+  - Never opens a database connection or re-runs a query.
+  - Rejects a complete queryDatabase envelope when truncated is true.
+  - Completeness-sensitive assertions must use the complete query envelope rather than its data-only result projection.
+  - Uniform unordered rows use projected multiset counts; heterogeneous partial shapes use bounded non-recursive matching without exposing compared values.
+  - Mismatch errors report only a structural path and reason; actual and expected database values are never echoed.
+example:
+  verifyDatabaseResult:
+    id: verify_blue_items
+    actual: "${active_brand_items}"
+    expected:
+      - Item: Jacket
+        Price: "19.99"
+    matchMode: unorderedContains

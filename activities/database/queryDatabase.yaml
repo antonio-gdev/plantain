@@ -1,0 +1,82 @@
+activity: queryDatabase
+summary: Execute one bounded parameterized SELECT after database identifiers are established by reflection.
+parameters:
+  id:
+    type: string matching ^[A-Za-z][A-Za-z0-9_-]*$
+    required: true
+  source:
+    type: mapping with username, password, and dbUrl
+    required: true
+    description: Values should be env:APP_DB_USERNAME, env:APP_DB_PASSWORD, and env:APP_DB_URL or equivalent environment references.
+  sql:
+    type: non-empty string up to 1 MB
+    required: conditionally
+    description: Use exactly one of sql or file.
+  file:
+    type: relative .sql path below the project sql directory
+    required: conditionally
+    description: UTF-8, descriptor-bound without following symlinks, non-empty, and at most 1 MB; use exactly one of file or sql.
+  parameters:
+    type: mapping with at most 1000 identifier-shaped names
+    default: {}
+    description: Must exactly match every SQLAlchemy :named_bind in the statement.
+  resultMode:
+    type: value, row, or rows
+    default: rows
+    description: value requires one column and at most one row; row permits one row; rows returns a bounded list.
+  singleResult:
+    type: boolean or null
+    default: null
+    description: Legacy compatibility alias selecting row when true; cannot be combined with resultMode.
+  maxRows:
+    type: integer from 1 through 10000
+    default: configured PLANTAIN_DB_MAX_ROWS
+    description: Valid only for rows and cannot exceed the configured runtime maximum.
+result:
+  success: boolean
+  dialect: SQLAlchemy dialect name
+  columns: projected column labels
+  result: scalar/null for value, mapping/null for row, or mapping list for rows
+  rowCount: number of returned rows after the configured bound
+  truncated: true when row or byte bounds made the result incomplete
+  resultMode: effective value, row, or rows mode
+operationTrace:
+  target: Project-relative SQL file or a short SHA-256 identity for an inline SELECT.
+  input: Bounded sanitized named parameters, result mode, and configured row bound.
+  actual: Bounded sanitized result evidence, returned row count, and truncation state.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Credentials and raw inline SQL are never logged; the complete bounded result remains available only in isolated scenario context for chaining.
+    - Chaining ${id} preserves the complete envelope and truncation state; ${id.result} intentionally projects only result data.
+security:
+  - SQL is parsed for the active dialect and must be one provably read-only SELECT or read-only common-table expression.
+  - DML, DDL, locking reads, SQL Server lock hints, stored procedures, multiple statements, SELECT INTO, and unsafe pragmas are rejected before execution.
+  - Known side-effecting, advisory-lock, sequence, external-access, and availability-abuse functions are rejected without blocking ordinary analytical functions.
+  - Vendor read-only transaction controls and statement or driver timeouts are applied where supported.
+  - User and test-data values must use named binds; supplied and expected bind names must match exactly.
+  - SQL files are opened below the project sql directory using descriptor-bound no-follow reads; symlinked paths fail closed.
+  - Results stream in bounded batches and enforce row, column, cell, structured-depth, and complete-envelope byte limits.
+  - A quiet vendor-correct root row cap is added when absent; explicit stricter limits are preserved.
+  - The timeout bounds server work because client fetch and byte limits alone cannot make an expensive query cheap.
+  - DBAPI drivers may materialize ordinary scalar cells; sized streamable LOBs are rejected before reading when supported.
+  - Raw SQL and unbounded returned values are not written to activity logs; all bounded trace evidence and declared outputs pass through scenario redaction.
+  - Deploy with a least-privilege read-only account as the database authorization boundary.
+  - Real credentials should use env:NAME; credential-shaped fields, env-resolved values, and user-configured sensitive-key fragments are redacted regardless of input syntax.
+  - The resolved endpoint must be authorized as an exact host:port; private and non-local access require their explicit deployment controls.
+example:
+  queryDatabase:
+    id: active_brand_items
+    source:
+      username: "env:APP_DB_USERNAME"
+      password: "env:APP_DB_PASSWORD"
+      dbUrl: "env:APP_DB_URL"
+    sql: |-
+      SELECT "Item", "Price"
+      FROM "Brands"."Uno"
+      WHERE "Color" = :color
+      ORDER BY "Item" ASC
+      LIMIT 10
+    parameters:
+      color: blue
+    resultMode: rows
+    maxRows: 10

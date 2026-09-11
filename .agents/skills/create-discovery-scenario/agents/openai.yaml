@@ -1,0 +1,7 @@
+interface:
+  display_name: "Create UI Discovery"
+  short_description: "Turn a plain walkthrough into live UI snapshots"
+  default_prompt: "Use $create-discovery-scenario to discover this web UI from my plain-language walkthrough."
+policy:
+  allow_implicit_invocation: true
+

@@ -1,0 +1,153 @@
+scenario: "SauceDemo - Discover Checkout Journey"
+JiraTicket: N/A
+tags:
+  - discovery
+  - saucedemo
+  - checkout
+
+steps:
+  - capturePageSnapshot:
+      id: discover_inventory
+      activity: sauce_demo_inventory
+      url: "env:SAUCE_DEMO_URL"
+      actions:
+        - fill:
+            target:
+              placeholder: Username
+            value: "env:SAUCE_DEMO_USERNAME"
+        - fill:
+            target:
+              placeholder: Password
+            value: "env:SAUCE_DEMO_PASSWORD"
+        - click:
+            target:
+              role: button
+              name: Login
+        - waitForUrl:
+            value: "**/inventory.html"
+      snapshot:
+        enabled: true
+        captureAfterEachAction: false
+      verify:
+        - url:
+            equals: "https://www.saucedemo.com/inventory.html"
+
+  - capturePageSnapshot:
+      id: discover_cart
+      activity: sauce_demo_cart
+      actions:
+        - click:
+            target:
+              css: '[data-test="add-to-cart-sauce-labs-backpack"]'
+        - click:
+            target:
+              css: '[data-test="shopping-cart-link"]'
+        - waitForUrl:
+            value: "**/cart.html"
+      snapshot:
+        enabled: true
+        captureAfterEachAction: false
+      verify:
+        - url:
+            equals: "https://www.saucedemo.com/cart.html"
+        - visible:
+            target:
+              role: button
+              name: View details for Sauce Labs Backpack
+        - text:
+            target:
+              css: '[data-test="item-quantity"]'
+            equals: "1"
+
+  - capturePageSnapshot:
+      id: discover_checkout_information
+      activity: sauce_demo_checkout_information
+      actions:
+        - click:
+            target:
+              role: button
+              name: Checkout
+        - waitForUrl:
+            value: "**/checkout-step-one.html"
+      snapshot:
+        enabled: true
+        captureAfterEachAction: false
+      verify:
+        - url:
+            equals: "https://www.saucedemo.com/checkout-step-one.html"
+
+  - capturePageSnapshot:
+      id: discover_checkout_overview
+      activity: sauce_demo_checkout_overview
+      actions:
+        - fill:
+            target:
+              placeholder: First Name
+            value: Tester
+        - fill:
+            target:
+              placeholder: Last Name
+            value: QA
+        - fill:
+            target:
+              placeholder: Zip/Postal Code
+            value: "90210"
+        - click:
+            target:
+              role: button
+              name: Continue
+        - waitForUrl:
+            value: "**/checkout-step-two.html"
+      snapshot:
+        enabled: true
+        captureAfterEachAction: false
+      verify:
+        - url:
+            equals: "https://www.saucedemo.com/checkout-step-two.html"
+        - text:
+            target:
+              css: '[data-test="subtotal-label"]'
+            equals: 'Item total: $29.99'
+        - text:
+            target:
+              css: '[data-test="tax-label"]'
+            equals: 'Tax: $2.40'
+        - text:
+            target:
+              css: '[data-test="total-label"]'
+            equals: 'Total: $32.39'
+
+  - capturePageSnapshot:
+      id: discover_checkout_complete
+      activity: sauce_demo_checkout_complete
+      actions:
+        - click:
+            target:
+              role: button
+              name: Finish
+        - waitForUrl:
+            value: "**/checkout-complete.html"
+      snapshot:
+        enabled: true
+        captureAfterEachAction: false
+      verify:
+        - url:
+            equals: "https://www.saucedemo.com/checkout-complete.html"
+        - visible:
+            target:
+              text: Thank you for your order!
+        - visible:
+            target:
+              text: Your order has been dispatched, and will arrive just as fast as the pony can get there!
+
+outputs:
+  inventoryUrl: "${discover_inventory.url}"
+  inventorySnapshot: "${discover_inventory.snapshots[0].canonicalFile}"
+  cartUrl: "${discover_cart.url}"
+  cartSnapshot: "${discover_cart.snapshots[0].canonicalFile}"
+  checkoutInformationUrl: "${discover_checkout_information.url}"
+  checkoutInformationSnapshot: "${discover_checkout_information.snapshots[0].canonicalFile}"
+  checkoutOverviewUrl: "${discover_checkout_overview.url}"
+  checkoutOverviewSnapshot: "${discover_checkout_overview.snapshots[0].canonicalFile}"
+  checkoutCompleteUrl: "${discover_checkout_complete.url}"
+  checkoutCompleteSnapshot: "${discover_checkout_complete.snapshots[0].canonicalFile}"

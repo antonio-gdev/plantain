@@ -1,0 +1,154 @@
+activity: capturePageSnapshot
+summary: Navigate any web UI, execute semantic actions and assertions, and retain complete verified or diagnostic DOM evidence.
+parameters:
+  id:
+    type: string matching ^[A-Za-z][A-Za-z0-9_-]*$
+    required: true
+  activity:
+    type: string or null
+    default: step id
+    description: Stable alias assigned only after the requested page state is verified.
+  url:
+    type: absolute HTTP(S) URL or env reference
+    default: current scenario page
+    description: Normally supplied only by the first step that starts navigation.
+  actions:
+    type: ordered list
+    default: []
+    resourceBoundary: Governed by the configured YAML document budgets and scenario deadline; no separate fixed action-count cap.
+    verbs:
+      - click
+      - fill
+      - clear
+      - type
+      - press
+      - select
+      - check
+      - uncheck
+      - hover
+      - focus
+      - scrollIntoView
+      - waitFor
+      - waitForUrl
+      - reload
+      - goBack
+      - goForward
+    fields:
+      target: Required for element actions; uses the locator contract below.
+      value: Required by fill, type, and waitForUrl; accepted by press for compatibility.
+      key: Preferred key value for press.
+      choices: Required by select; each choice has exactly one of value, label, or zero-based index.
+      state: attached, detached, visible, or hidden; used by waitFor and defaults to visible.
+      timeoutMs: Optional integer from 100 through 300000.
+      delayMs: Optional integer from 0 through 10000.
+      force: Optional boolean, default false.
+      expectPopup: Valid only for click; makes the new page active for later actions.
+      expectResponse:
+        type: mapping or null
+        description: Optional causal response expectation armed immediately before this action.
+        fields:
+          url: Required case-sensitive glob matched against the complete response URL.
+          method: Required supported HTTP method.
+          status: Required HTTP status or non-empty list of at most 100 statuses from 100 through 599.
+          timeoutMs: Optional integer from 100 through 300000; defaults to the action or activity timeout.
+  locator:
+    description: Each target requires exactly one primary strategy.
+    primaryStrategies:
+      - role; name is allowed only with role
+      - label
+      - placeholder
+      - text
+      - altText
+      - title
+      - testId; maps to Playwright's configured test-id attribute, default data-testid
+      - css
+      - xpath
+    optionalFields:
+      exact: boolean, default true
+      nth: zero-based non-negative integer
+      visible: boolean, default true
+      frames: ordered list with exactly one of name, exact url, or css per frame; traversal follows the recorded frame path without a separate fixed depth cap
+  verify:
+    type: ordered list
+    default: []
+    resourceBoundary: Governed by the configured YAML document budgets and scenario deadline; no separate fixed assertion-count cap.
+    assertions:
+      - visible
+      - hidden
+      - enabled
+      - disabled
+      - editable
+      - checked
+      - unchecked
+      - text
+      - value
+      - count
+      - attribute
+      - url
+      - title
+    rules:
+      - Element assertions require target; url and title are page assertions.
+      - text and value require equals or contains.
+      - count requires an integer equals value.
+      - attribute requires attribute and equals.
+      - url and title require equals or contains.
+  snapshot:
+    type: mapping
+    default:
+      enabled: true
+      captureAfterEachAction: false
+    description: Intermediate capture occurs after every action except the last; final capture retains the actual page even when intent fails.
+  timeoutMs:
+    type: integer from 100 through 300000 or null
+    default: configured action timeout
+  waitUntil:
+    type: commit, domcontentloaded, load, or networkidle
+    default: domcontentloaded
+validation:
+  - At least one of url, actions, or verify is required.
+  - Every locator must be grounded in user input or a current canonical snapshot.
+  - testId maps only to Playwright's configured test-id attribute; use a recorded css strategy for data-test or other attributes.
+  - Final evidence with assertions is registered as diagnostic, then atomically promoted only after every assertion passes.
+  - A failed action attempts one complete diagnostic capture before the original safe action error is returned.
+  - DOM mutation or page/frame topology change aborts that atomic attempt; the activity retries at most three complete attempts and registers nothing unless one succeeds.
+  - expectResponse requires url, method, and status together; actions without it install no response waiter.
+telemetry:
+  diagnostic:
+    - Navigation, every action, snapshot capture, registration, verification, and promotion record passed or failed lifecycle evidence.
+    - UI records derive operation type and sanitized target automatically; YAML has no logging-description field.
+    - Detailed logs and native operation traces include bounded, sanitized action inputs and assertion expectations.
+    - Causal response expectations retain only bounded sanitized URL, method, and status evidence; response bodies are never retained.
+  terminal:
+    - Compact scenario.completed events exclude action inputs and expectations while retaining bounded failure classification.
+result:
+  success: boolean
+  url: sanitized final page URL
+  pageTitle: sanitized final page title
+  actionsExecuted: integer
+  verificationsPassed: integer
+  snapshots:
+    type: list
+    fields:
+      activity: stable registry alias
+      canonicalFile: project-relative verified or diagnostic snapshot path
+      status: registry disposition
+      evidenceState: verified or diagnostic
+      failureStage: action, verification, or null
+security:
+  - Browser binary preparation is lazy, browser-specific, lock-protected, shell-free, and bounded.
+  - The installer subprocess receives only approved OS/cache/TLS/proxy variables, never application credential variables.
+  - Custom artifact hosts require an explicit framework opt-in and HTTPS without embedded credentials, query, or fragment.
+  - The framework never installs privileged operating-system packages automatically.
+  - Every HTTP request and WebSocket passes the configured URL, DNS, and public-address policy.
+  - Service workers are blocked so they cannot originate unobserved traffic.
+  - Contexts, cookies, storage, telemetry, and scenario values are isolated per scenario.
+  - Complete semantic accessibility and DOM records plus network deltas are content-addressed and chunked without a total layout cap.
+  - Working-set or storage-envelope exhaustion fails the capture atomically and never registers partial evidence.
+  - Failed intent may retain complete diagnostic evidence, but diagnostics never resolve through verified activity aliases.
+  - Registry v4 stores structural states in entries; each entry contains verified activities and exact-filename diagnostics.
+  - Locator reuse requires registry schema 4.0, complete manifest schema 3.0, matching metadata, contained non-symlink paths, exact byte counts, and matching SHA-256 digests.
+example:
+  capturePageSnapshot:
+    id: capture_login
+    activity: sauce_demo_login
+    url: "env:SAUCE_DEMO_URL"

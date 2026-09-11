@@ -1,0 +1,6 @@
+interface:
+  display_name: "Generate Automation"
+  short_description: "Create complete YAML integration and E2E tests"
+  default_prompt: "Use $generate-automation to generate a runnable YAML scenario from my intent and the evidence required by each included domain."
+policy:
+  allow_implicit_invocation: true

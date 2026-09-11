@@ -1,0 +1,94 @@
+activity: sendRequest
+summary: Execute a generic bounded HTTP request for API integration and setup workflows.
+parameters:
+  id:
+    type: string
+    required: true
+  endpoint:
+    type: string
+    required: true
+    description: Absolute URL or a path used with baseUrl.
+  baseUrl:
+    type: string or null
+    default: null
+  method:
+    type: GET, HEAD, OPTIONS, POST, PUT, PATCH, or DELETE
+    default: GET
+  headers:
+    type: mapping of string to string
+    default: {}
+  query:
+    type: mapping of scalar or scalar-list values
+    default: {}
+  body:
+    type: any YAML value
+    default: null
+    description: Mutually exclusive with file.
+  file:
+    type: project api-data relative JSON path
+    default: null
+    description: Mutually exclusive with body.
+  bodyFormat:
+    type: auto, json, form, or text
+    default: auto
+  expectedStatus:
+    type: integer, integer list, or inclusive minimum/maximum mapping
+    default: 200
+  expectedMessage:
+    type: string or null
+    default: null
+    description: Case-insensitive substring expected anywhere in the complete decoded response.
+  logResponseBody:
+    type: boolean
+    default: true
+    description: Log a recursively sanitized response preview; status and size are always logged.
+  timeoutSeconds:
+    type: number greater than zero and at most 300
+    default: configured API timeout
+result:
+  success: boolean
+  requestUrl: sanitized final request URL
+  method: HTTP method
+  requestBody: resolved request body retained for scenario-local chaining
+  statusCode: integer
+  headers: sanitized response headers
+  contentType: observed response Content-Type header, or null when omitted
+  responseBody: decoded JSON, text, null, or bounded binary metadata
+  responseBytes: integer
+  elapsedMs: integer
+operationTrace:
+  target: Sanitized final request URL.
+  input: Bounded sanitized headers, query parameters, and resolved request body.
+  expected: Expected status and optional response-message assertion.
+  actual: HTTP status, response byte count, and elapsed milliseconds.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Complete response data stays in isolated scenario context for chaining and is never copied into the operation trace.
+    - Failures before normal execution begins retain only a minimal sanitized prepare record.
+security:
+  - Optional PLANTAIN_API_ALLOWED_METHODS restricts methods process-wide without YAML changes;
+    empty permits all supported methods.
+  - Host, Content-Length, and transfer-encoding request headers are framework-managed.
+  - Header names and values, query names and values, query cardinality, and request bytes are bounded internally without additional scenario settings.
+  - Header line breaks and case-insensitive duplicate names are rejected.
+  - Query parameters are encoded before the final URL passes policy validation.
+  - Redirects and all final targets pass the URL policy.
+  - Cross-origin redirects preserve only conservative content-negotiation and representation headers; credential-bearing and custom headers are stripped.
+  - One timeout and response-byte budget covers the complete retry and redirect chain; elapsedMs covers that entire chain.
+  - Request and response JSON numbers must be finite, and decoded JSON depth and item count are bounded internally.
+  - Project-relative body files use one byte-bounded descriptor read without following symbolic links.
+  - Response logs are recursively sanitized, mask likely opaque credentials, and are capped at 8 KiB.
+  - Complete response data remains only in isolated scenario context for later step chaining.
+  - Set logResponseBody to false when even a sanitized response preview is inappropriate.
+example:
+  sendRequest:
+    id: list_available_without_schema_validation
+    endpoint: "https://petstore.swagger.io/v2/pet/findByStatus"
+    method: GET
+    headers:
+      Accept: application/json
+    query:
+      status:
+        - available
+    expectedStatus: 200
+    expectedMessage: available

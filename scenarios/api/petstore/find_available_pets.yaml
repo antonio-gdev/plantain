@@ -1,0 +1,41 @@
+scenario: "Petstore - Validate Find Available Pets Contract"
+tags:
+  - api
+  - petstore
+  - schema
+  - validation
+
+steps:
+  - loadApiSchema:
+      id: petstore_schema
+      schemaUrl: "env:PETSTORE_SCHEMA_URL"
+
+  - callSchema:
+      id: find_available
+      schemaId: "${petstore_schema.schemaId}"
+      operationId: findPetsByStatus
+      headers:
+        Accept: application/json
+      query:
+        status:
+          - available
+      expectedStatus: 200
+      validateRequest: true
+      validateResponse: false
+
+  - validateSchema:
+      id: verify_contract
+      schemaId: "${petstore_schema.schemaId}"
+      operationId: findPetsByStatus
+      statusCode: "${find_available.statusCode}"
+      contentType: "${find_available.contentType}"
+      body: "${find_available.responseBody}"
+      expectedValid: true
+
+outputs:
+  schemaId: "${petstore_schema.schemaId}"
+  statusCode: "${find_available.statusCode}"
+  responseBytes: "${find_available.responseBytes}"
+  schemaValid: "${verify_contract.schemaValid}"
+  schemaPath: "${verify_contract.schemaPath}"
+  schemaRule: "${verify_contract.schemaRule}"
