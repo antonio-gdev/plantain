@@ -6,8 +6,7 @@ use **Create** when you want the agent to create or revise behavior.
 
 ![Tests catalog showing filters, scope actions, readiness, metadata, and row actions](../assets/images/tests-catalog.png)
 
-*The catalog keeps filtering and batch scope above the table while each normal row
-retains only View steps and Run test.*
+*The catalog keeps filtering and batch scope above the table while each normal row retains only View steps and Run test.*
 
 ## Read a test row
 

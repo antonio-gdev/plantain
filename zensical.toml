@@ -11,9 +11,9 @@ nav = [
   { "Get started" = [
     { "Overview" = "get-started/overview.md" },
     { "Installation" = "get-started/installation.md" },
+    { "Dashboard quickstart" = "get-started/dashboard.md" },
+    { "CLI quickstart" = "get-started/cli.md" },
     { "Create your first test" = "get-started/first-test.md" },
-    { "Dashboard" = "get-started/dashboard.md" },
-    { "CLI" = "get-started/cli.md" },
   ] },
   { "Create tests" = [
     { "Effective intents" = "testing/effective-intents.md" },
@@ -66,26 +66,20 @@ features = [
   "content.tabs.link",
 ]
 
-[[project.theme.palette]]
-media = "(prefers-color-scheme)"
-toggle.icon = "lucide/sun-moon"
-toggle.name = "Use light mode"
-
-[[project.theme.palette]]
 media = "(prefers-color-scheme: light)"
 scheme = "default"
-primary = "custom"
-accent = "custom"
+primary = "blue"
+accent = "amber"
 toggle.icon = "lucide/sun"
-toggle.name = "Use dark mode"
+toggle.name = "Switch to dark mode"
 
 [[project.theme.palette]]
 media = "(prefers-color-scheme: dark)"
 scheme = "slate"
-primary = "custom"
-accent = "custom"
+primary = "blue"
+accent = "blue"
 toggle.icon = "lucide/moon"
-toggle.name = "Follow system preference"
+toggle.name = "Switch to light mode"
 
 [project.extra]
 generator = false

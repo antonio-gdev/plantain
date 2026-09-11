@@ -4,6 +4,14 @@ Plantain works best when you describe the behavior that deserves confidence and 
 result that would prove it. You do not need to translate that goal into test code,
 page selectors, HTTP requests, or SQL.
 
+## Agent workspace
+
+The **Create** page is Plantain’s Agent IDE. Describe what you want to test and add relevant context when needed. The agent uses that context to clarify your intent, create a grounded test, run it, and show progress in the workspace.
+
+![Create page showing the Agent workspace, test intent, context, and live execution](../assets/images/create-agent-workspace.png)
+
+*The Agent workspace keeps planning, test creation, and live execution together so you can review the agent’s progress and results in one place.*
+
 ## Start with the outcome
 
 A useful intent answers three questions:

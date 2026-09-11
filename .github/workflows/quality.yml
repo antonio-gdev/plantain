@@ -188,4 +188,3 @@ jobs:
 
       - name: Run supported-platform unit tests
         run: uv run --locked --all-extras pytest -q -p no:cacheprovider tests/unit
-vider tests/unit

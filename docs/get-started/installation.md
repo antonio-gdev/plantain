@@ -10,8 +10,7 @@ You need:
 
 - Python 3.11, 3.12, 3.13, or 3.14;
 - `uv` 0.12.5;
-- a local copy of the Plantain repository;
-- permission to access any application, API, or database you plan to test.
+- You can download the source code directly from the official [GitHub Repository](https://github.com/gilliama/plantain)
 
 Live targets and credentials are not required to install Plantain or validate the
 included scenarios.
