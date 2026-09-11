@@ -193,7 +193,8 @@ class BrowserProvisioner:
 
 def _lock_path(browser: BrowserName, executable_path: Path) -> Path:
     identity = hashlib.sha256(f"{browser}:{executable_path.absolute()}".encode()).hexdigest()[:24]
-    return Path(tempfile.gettempdir()) / f"plantain-playwright-{identity}" / "install.lock"
+    temp_root = Path(tempfile.gettempdir()).resolve(strict=True)
+    return temp_root / f"plantain-playwright-{identity}" / "install.lock"
 
 
 def _installer_environment(allow_custom_download_hosts: bool) -> dict[str, str]:

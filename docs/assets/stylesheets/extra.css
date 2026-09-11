@@ -1,34 +1,45 @@
 :root {
-  --plantain-blue: #1d65d8;
-  --plantain-blue-dark: #174faa;
+  --plantain-blue: #1a73e8;
+  --plantain-blue-dark: #1557b0;
+  --plantain-blue-light: #8ab4f8;
   --plantain-ink: #172231;
-  --plantain-muted: #5d6875;
-  --plantain-warm: #faf9f7;
-  --plantain-yellow: #f1c84b;
+  --plantain-gold: #f1c84b;
+  --plantain-charcoal: #202124;
+  --plantain-white: #ffffff;
+  --plantain-warm-bg: #faf9f7;
+  
+  --plantain-dark-bg: #121212;
+  --plantain-dark-surface: #1e1e1e;
 }
 
 [data-md-color-scheme="default"] {
-  --md-default-bg-color: var(--plantain-warm);
-  --md-default-fg-color: var(--plantain-ink);
-  --md-default-fg-color--light: var(--plantain-muted);
-  --md-primary-fg-color: var(--plantain-ink);
-  --md-primary-fg-color--light: #26384c;
-  --md-primary-fg-color--dark: #101923;
-  --md-accent-fg-color: var(--plantain-blue);
-  --md-typeset-a-color: var(--plantain-blue-dark);
-  --md-code-bg-color: #f1efeb;
+  --md-default-bg-color: var(--plantain-warm-bg);
+  --md-default-fg-color: var(--plantain-charcoal);
+  --md-default-fg-color--light: #5f6368;
+  --md-primary-fg-color: var(--plantain-blue);
+  --md-primary-fg-color--light: var(--plantain-blue-dark);
+  --md-primary-fg-color--dark: var(--plantain-blue-dark);
+  --md-typeset-h1-color: #1f1f1f;
+  --md-typeset-h2-color: #3c4043;
+  --md-typeset-h3-color: #3c4043;
+  --md-accent-fg-color: var(--plantain-gold);
+  --md-typeset-a-color: var(--plantain-blue);
+  --md-code-bg-color: #f1f3f4;
 }
 
 [data-md-color-scheme="slate"] {
-  --md-default-bg-color: #101821;
-  --md-default-fg-color: #eef2f6;
-  --md-default-fg-color--light: #b4bec9;
-  --md-primary-fg-color: var(--plantain-ink);
-  --md-primary-fg-color--light: #26384c;
-  --md-primary-fg-color--dark: #101923;
-  --md-accent-fg-color: #6ea8ff;
-  --md-typeset-a-color: #82b4ff;
-  --md-code-bg-color: #172231;
+  --md-default-bg-color: var(--plantain-dark-bg);
+  --md-default-fg-color: #e8eaed;
+  --md-default-fg-color--light: #9aa0a6;
+  --md-primary-fg-color: var(--plantain-dark-surface);
+  --md-primary-fg-color--light: #2d2d2d;
+  --md-primary-fg-color--dark: #121212;
+  --md-typeset-h1-color: var(--plantain-white);
+  --md-typeset-h2-color: #f1f3f4;
+  --md-typeset-h3-color: #e8eaed;
+  --md-accent-fg-color: var(--plantain-blue-light);
+  --md-typeset-a-color: var(--plantain-blue-light);
+  --md-code-bg-color: var(--plantain-dark-surface);
 }
 
 .md-header,

@@ -30,6 +30,9 @@ Read the root instructions first. Nested API and database directories add strict
   navigation, redirects, popups, and requests; apply WebSocket policy before forwarding a socket.
 - Lazy browser installation is browser-specific, shell-free, lock-protected, and receives only an
   allowlisted child environment. Never run `install-deps`, sudo, or a package manager.
+- Canonicalize only the existing platform temporary root before constructing the private browser
+  installation lock. Every framework-appended component remains subject to owner-only persistence
+  and symlink rejection; never resolve an already-constructed lock path to bypass those checks.
 - Browser tracing stays disabled by default because trace archives can retain page data, tokens,
   and credentials.
 - Optional per-action response expectations must arm on the isolated browser context before the

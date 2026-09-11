@@ -7,6 +7,7 @@ import os
 import stat
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -65,6 +66,22 @@ def test_missing_browser_respects_auto_install_opt_out(tmp_path: Path) -> None:
                 str(tmp_path / "missing"),
             )
         )
+
+
+def test_lock_path_resolves_platform_temp_alias(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    canonical_temp = tmp_path / "canonical"
+    canonical_temp.mkdir()
+    temp_alias = tmp_path / "alias"
+    temp_alias.symlink_to(canonical_temp, target_is_directory=True)
+    monkeypatch.setattr(tempfile, "gettempdir", lambda: str(temp_alias))
+
+    lock_path = _lock_path("chromium", tmp_path / "browser")
+
+    assert lock_path.parent.parent == canonical_temp
+    assert temp_alias not in lock_path.parents
 
 
 def test_install_is_browser_specific_shell_free_and_drops_application_secrets(

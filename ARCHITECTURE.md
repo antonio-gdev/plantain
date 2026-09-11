@@ -57,8 +57,10 @@ enter only that scenario's context; sanitized operation evidence is retained sep
 and reports.
 
 Activity preparation is deduplicated before steps run. UI preparation can provision one browser
-binary, while API and database-only runs never initialize Playwright. Finalization attempts every
-owned cleanup path even when a step has already failed.
+binary, while API and database-only runs never initialize Playwright. Browser provisioning
+canonicalizes the existing platform temporary root before constructing its private installation
+lock, then applies the normal no-symlink and owner-only persistence checks to the appended path.
+Finalization attempts every owned cleanup path even when a step has already failed.
 
 One shared admission controller caps scenarios, browser sessions, API requests, database
 operations, worker threads, and worker processes. Cancellation retains a permit until its
