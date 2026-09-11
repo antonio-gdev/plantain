@@ -1,0 +1,191 @@
+name: Python quality
+
+on:
+  workflow_dispatch: # Keeps the manual run button active
+  pull_request:
+    branches: [ main ] # Runs automatically on every PR targeting main
+  push:
+    branches: [ main ] # Runs automatically when code is merged into main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  UV_NO_PROGRESS: "1"
+
+jobs:
+  quality:
+    name: Quality and security
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras
+
+      - name: Lint
+        run: uv run --locked --all-extras ruff check .
+
+      - name: Check formatting
+        run: uv run --locked --all-extras ruff format --check .
+
+      - name: Type check the Python 3.11 floor
+        run: uv run --locked --all-extras mypy src
+
+      - name: Scan source for common security defects
+        run: uv run --locked --all-extras bandit -c pyproject.toml -r src
+
+      - name: Validate all scenarios
+        run: uv run --locked --all-extras plantain --no-dotenv validate scenarios
+
+      - name: Parse checked-in YAML
+        run: |
+          uv run --locked --all-extras python - <<'PY'
+          from pathlib import Path
+
+          import yaml
+
+          roots = (Path("scenarios"), Path("activities"))
+          files = sorted(path for root in roots for path in root.rglob("*.yaml"))
+          for path in files:
+              yaml.safe_load(path.read_text(encoding="utf-8"))
+          print(f"Parsed {len(files)} YAML files")
+          PY
+
+      - name: Audit the complete locked dependency graph
+        run: |
+          uv export --locked --all-extras --no-emit-project \
+            --output-file "${RUNNER_TEMP}/plantain-audit-requirements.txt"
+          uv run --locked --extra dev pip-audit \
+            --requirement "${RUNNER_TEMP}/plantain-audit-requirements.txt" \
+            --disable-pip \
+            --progress-spinner off
+
+      - name: Build distribution artifacts
+        run: uv build
+
+      - name: Verify distribution artifact contents
+        run: |
+          uv run --locked --all-extras python \
+            tests/packaging/verify_artifacts.py dist
+
+      - name: Smoke-test clean wheel and source distribution installs
+        shell: bash
+        run: |
+          set -euo pipefail
+          smoke_root="${RUNNER_TEMP}/plantain-artifact-smoke"
+          constraints="${RUNNER_TEMP}/plantain-audit-requirements.txt"
+          wheel=(dist/*.whl)
+          sdist=(dist/*.tar.gz)
+
+          for artifact in "${wheel[0]}" "${sdist[0]}"; do
+            if [[ "${artifact}" == *.whl ]]; then
+              kind="wheel"
+            else
+              kind="sdist"
+            fi
+            environment="${smoke_root}/${kind}/venv"
+            project="${smoke_root}/${kind}/project"
+            mkdir -p "${project}/scenarios"
+            cp -R scenarios/. "${project}/scenarios/"
+            uv venv --python 3.14 "${environment}"
+            uv pip install \
+              --python "${environment}/bin/python" \
+              -c "${constraints}" \
+              "${artifact}"
+            (
+              cd "${project}"
+              "${environment}/bin/python" -I -c \
+                'from pathlib import Path; import plantain, sys; assert Path(plantain.__file__).resolve().is_relative_to(Path(sys.prefix).resolve())'
+              "${environment}/bin/plantain" \
+                --project-root "${project}" --no-dotenv activities
+              "${environment}/bin/plantain" \
+                --project-root "${project}" --no-dotenv validate scenarios
+            )
+          done
+
+  compatibility:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras
+
+      - name: Run unit tests with branch coverage
+        run: |
+          uv run --locked --all-extras pytest -q -p no:cacheprovider \
+            --cov=plantain \
+            --cov-report=term-missing \
+            --cov-fail-under=80 \
+            tests/unit
+
+  macos-compatibility:
+    name: macOS 14 / Python 3.14
+    runs-on: macos-14
+    timeout-minutes: 20
+    steps:
+      - name: Check out source
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.14"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        with:
+          version: "0.12.5"
+          enable-cache: true
+          cache-dependency-glob: uv.lock
+
+      - name: Install locked dependencies
+        run: uv sync --locked --all-extras
+
+      - name: Run supported-platform unit tests
+        run: uv run --locked --all-extras pytest -q -p no:cacheprovider tests/unit
+vider tests/unit

@@ -1,0 +1,77 @@
+activity: discoverDatabase
+summary: Discover bounded relational metadata without reading application rows.
+parameters:
+  id:
+    type: string matching ^[A-Za-z][A-Za-z0-9_-]*$
+    required: true
+  source:
+    type: mapping
+    required: true
+    fields:
+      username: non-empty string; normally env:APP_DB_USERNAME
+      password: secret string; normally env:APP_DB_PASSWORD
+      dbUrl: supported JDBC-style URL; normally env:APP_DB_URL
+  phase:
+    type: schemas, tables, or table
+    required: true
+  schema:
+    type: string or null
+    default: null
+    description: Required for tables; optional for table when the driver has a default schema.
+  table:
+    type: string or null
+    default: null
+    description: Required only for the table phase.
+  includeViews:
+    type: boolean
+    default: false
+    description: Valid for tables/table; lets the selected object be a reflected view.
+  includeSystemSchemas:
+    type: boolean
+    default: false
+    description: Valid only for schemas; system schemas are hidden by default.
+  pageSize:
+    type: integer from 1 through 1000
+    default: 250
+    description: Valid for schemas/tables; ignored values are rejected for table.
+  cursor:
+    type: opaque string or null
+    default: null
+    description: Use only a nextCursor returned by the same phase and scope.
+result:
+  success: boolean
+  phase: schemas, tables, or table
+  dialect: postgresql, mssql, mysql, or oracle
+  schema: exact reflected schema or null
+  schemas: current schema-name page
+  objects: current table/view identity page
+  tableMetadata: complete columns, primary key, foreign keys, indexes, unique constraints, and check constraints for one object
+  itemCount: integer count in this response
+  hasMore: boolean
+  nextCursor: opaque continuation or null
+operationTrace:
+  target: Discovery phase plus the selected schema/table scope.
+  input: Bounded sanitized metadata-selection options such as view inclusion, page size, and cursor presence.
+  actual: Bounded sanitized reflected metadata and pagination evidence.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Database credentials, connection URLs, and application rows are never copied into the operation trace.
+security:
+  - PostgreSQL, SQL Server, MySQL, and Oracle catalog names are filtered and paged server-side when supported; unsupported driver behavior quietly falls back to SQLAlchemy Inspector/reflection without requiring configuration.
+  - Framework-issued discovery queries target metadata catalogs only and bind all selected names; discovery never generates application-row SELECTs.
+  - Schema/table identifiers are resolved case-insensitively only when unambiguous and returned with exact reflected case.
+  - Opaque cursors are scope-bound; a cursor cannot be reused for another schema or phase.
+  - Metadata text, page size, complete result bytes, execution time, sources, and pools are bounded.
+  - Real credentials should use env:NAME; credential-shaped fields, env-resolved values, and configured sensitive-key fragments are excluded from source identity/log rendering.
+  - Deploy with a least-privilege read-only account; discovery never attempts to infer or elevate grants.
+  - The resolved endpoint must be authorized as an exact host:port; private and non-local access require their explicit deployment controls.
+example:
+  discoverDatabase:
+    id: discover_uno
+    source:
+      username: "env:APP_DB_USERNAME"
+      password: "env:APP_DB_PASSWORD"
+      dbUrl: "env:APP_DB_URL"
+    phase: table
+    schema: Brands
+    table: Uno

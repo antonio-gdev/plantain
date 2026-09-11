@@ -1,0 +1,117 @@
+:root {
+  --plantain-blue: #1d65d8;
+  --plantain-blue-dark: #174faa;
+  --plantain-ink: #172231;
+  --plantain-muted: #5d6875;
+  --plantain-warm: #faf9f7;
+  --plantain-yellow: #f1c84b;
+}
+
+[data-md-color-scheme="default"] {
+  --md-default-bg-color: var(--plantain-warm);
+  --md-default-fg-color: var(--plantain-ink);
+  --md-default-fg-color--light: var(--plantain-muted);
+  --md-primary-fg-color: var(--plantain-ink);
+  --md-primary-fg-color--light: #26384c;
+  --md-primary-fg-color--dark: #101923;
+  --md-accent-fg-color: var(--plantain-blue);
+  --md-typeset-a-color: var(--plantain-blue-dark);
+  --md-code-bg-color: #f1efeb;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-default-bg-color: #101821;
+  --md-default-fg-color: #eef2f6;
+  --md-default-fg-color--light: #b4bec9;
+  --md-primary-fg-color: var(--plantain-ink);
+  --md-primary-fg-color--light: #26384c;
+  --md-primary-fg-color--dark: #101923;
+  --md-accent-fg-color: #6ea8ff;
+  --md-typeset-a-color: #82b4ff;
+  --md-code-bg-color: #172231;
+}
+
+.md-header,
+.md-tabs {
+  background-color: var(--plantain-ink);
+}
+
+.md-header__button.md-logo img {
+  height: 1.55rem;
+  width: auto;
+}
+
+.md-main__inner {
+  margin-top: 1.5rem;
+}
+
+.md-typeset h1 {
+  color: var(--md-default-fg-color);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.md-typeset h2 {
+  font-weight: 650;
+  letter-spacing: -0.015em;
+}
+
+.plantain-hero {
+  max-width: 58rem;
+  padding: 2.5rem 0 1.75rem;
+}
+
+.plantain-hero h1 {
+  font-size: clamp(2.25rem, 5vw, 4rem);
+  line-height: 1.05;
+  margin: 0.35rem 0 1rem;
+}
+
+.plantain-hero p {
+  color: var(--md-default-fg-color--light);
+  font-size: 1.05rem;
+  max-width: 46rem;
+}
+
+.plantain-kicker {
+  color: var(--md-accent-fg-color);
+  font-size: 0.72rem;
+  font-weight: 750;
+  letter-spacing: 0.14em;
+}
+
+.md-typeset .md-button {
+  border-radius: 0.55rem;
+}
+
+.md-typeset .md-button--primary {
+  background-color: var(--plantain-blue);
+  border-color: var(--plantain-blue);
+}
+
+.md-typeset .md-button--primary:hover {
+  background-color: var(--plantain-blue-dark);
+  border-color: var(--plantain-blue-dark);
+}
+
+.md-typeset .grid.cards > ul > li {
+  background: color-mix(in srgb, var(--md-default-bg-color) 92%, var(--md-default-fg-color) 8%);
+  border: 0;
+  border-radius: 0.8rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 8%);
+  padding: 1.1rem 1.2rem;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  box-shadow: 0 8px 24px rgb(15 23 42 / 12%);
+}
+
+@media screen and (max-width: 44.984375em) {
+  .plantain-hero {
+    padding-top: 1rem;
+  }
+
+  .plantain-hero h1 {
+    font-size: 2.25rem;
+  }
+}

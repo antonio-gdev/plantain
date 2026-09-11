@@ -1,0 +1,122 @@
+activity: callSchema
+summary: Select, validate, invoke, and verify one operation from Swagger/OpenAPI metadata.
+parameters:
+  id:
+    type: string
+    required: true
+  schemaUrl:
+    type: string
+    required: conditionally
+    description: Use exactly one of schemaUrl or schemaId.
+  schemaId:
+    type: 64-character lowercase SHA-256 digest
+    required: conditionally
+    description: Use exactly one of schemaId or schemaUrl.
+  schemaHeaders:
+    type: mapping of string to string
+    default: {}
+    description: Applied only while loading schemaUrl; prohibited when schemaId is used.
+  operationId:
+    type: string
+    required: conditionally
+    description: Use operationId or the path and method pair.
+  path:
+    type: string
+    required: conditionally
+  method:
+    type: GET, HEAD, OPTIONS, POST, PUT, PATCH, or DELETE
+    required: conditionally
+  headers:
+    type: mapping of string to string
+    default: {}
+    description: Applied only to the selected API operation request.
+  query:
+    type: mapping of scalar or scalar-list values
+    default: {}
+  pathParams:
+    type: mapping of scalar values
+    default: {}
+  body:
+    type: any YAML value
+    default: null
+    description: Mutually exclusive with file.
+  file:
+    type: project api-data relative JSON path
+    default: null
+    description: Mutually exclusive with body.
+  bodyFormat:
+    type: auto, json, form, or text
+    default: auto
+  expectedStatus:
+    type: integer, integer list, or inclusive minimum/maximum mapping
+    default: 200
+  expectedMessage:
+    type: string or null
+    default: null
+    description: Case-insensitive substring expected anywhere in the complete decoded response.
+  logResponseBody:
+    type: boolean
+    default: true
+    description: Log a recursively sanitized response preview; status and size are always logged.
+  timeoutSeconds:
+    type: number greater than zero and at most 300
+    default: configured API timeout
+  validateRequest:
+    type: boolean
+    default: true
+    description: Validate supported parameters, serialization, and the actual request media type before transport.
+  validateResponse:
+    type: boolean
+    default: true
+    description: Select and validate the response body schema using the actual response media type.
+result:
+  success: boolean
+  requestUrl: sanitized final request URL
+  method: HTTP method
+  requestBody: resolved request body retained for scenario-local chaining
+  statusCode: integer
+  headers: sanitized response headers
+  contentType: observed response Content-Type header, or null when omitted
+  responseBody: decoded JSON, text, null, or bounded binary metadata
+  responseBytes: integer
+  elapsedMs: integer
+operationTrace:
+  target: Sanitized resolved operation endpoint.
+  input: Bounded sanitized path parameters, headers, query parameters, and resolved request body.
+  expected: Expected status, optional response-message assertion, and request/response validation settings.
+  actual: HTTP status, response byte count, elapsed milliseconds, and value-free schema-failure evidence when applicable.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Complete response data stays in isolated scenario context for chaining and is never copied into the operation trace.
+    - Failures before normal execution begins retain only a minimal sanitized prepare record.
+security:
+  - Optional PLANTAIN_API_ALLOWED_METHODS restricts operation methods without YAML changes;
+    empty permits all supported methods.
+  - Path parameters are percent encoded and must exactly match the schema declaration.
+  - Project-relative body files and cached schemas use descriptor-bound reads without following symbolic links.
+  - The first declared server and its default variables are deterministic; the resolved target still passes URL and DNS policy.
+  - Header and query inputs are bounded; query parameters are encoded before final URL validation.
+  - Redirect targets are revalidated and cross-origin redirects retain only conservative safe headers.
+  - HTTPS-to-HTTP redirects are rejected.
+  - Request and response bodies use separate byte boundaries.
+  - One timeout and response-byte budget covers the complete retry and redirect chain; elapsedMs covers that entire chain.
+  - Request and response JSON numbers must be finite, and decoded JSON depth and item count are bounded internally.
+  - Schema-download and operation headers are separate and are never cross-propagated.
+  - Unsupported cookie, form-data, parameter-serialization, and response-header contracts fail closed.
+  - Response logs are recursively sanitized, mask likely opaque credentials, and are capped at 8 KiB.
+  - Complete response data remains only in isolated scenario context for later step chaining.
+  - Set logResponseBody to false when even a sanitized response preview is inappropriate.
+example:
+  callSchema:
+    id: find_available
+    schemaId: "${petstore_schema.schemaId}"
+    operationId: findPetsByStatus
+    headers:
+      Accept: application/json
+    query:
+      status:
+        - available
+    expectedStatus: 200
+    expectedMessage: available
+    validateRequest: true
+    validateResponse: true
