@@ -19,10 +19,10 @@
   --md-primary-fg-color: var(--plantain-blue);
   --md-primary-fg-color--light: var(--plantain-blue-dark);
   --md-primary-fg-color--dark: var(--plantain-blue-dark);
-  --md-typeset-h1-color: #1f1f1f;
+  --md-typeset-h1-color: var(--plantain-charcoal);
   --md-typeset-h2-color: #3c4043;
   --md-typeset-h3-color: #3c4043;
-  --md-accent-fg-color: var(--plantain-gold);
+  --md-accent-fg-color: var(--plantain-blue);
   --md-typeset-a-color: var(--plantain-blue);
   --md-code-bg-color: #f1f3f4;
 }
@@ -44,7 +44,7 @@
 
 .md-header,
 .md-tabs {
-  background-color: var(--plantain-ink);
+  background-color: var(--md-primary-fg-color);
 }
 
 .md-header__button.md-logo img {
@@ -57,14 +57,19 @@
 }
 
 .md-typeset h1 {
-  color: var(--md-default-fg-color);
+  color: var(--md-typeset-h1-color);
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 
 .md-typeset h2 {
+  color: var(--md-typeset-h2-color);
   font-weight: 650;
   letter-spacing: -0.015em;
+}
+
+.md-typeset h3 {
+  color: var(--md-typeset-h3-color);
 }
 
 .plantain-hero {
@@ -85,7 +90,7 @@
 }
 
 .plantain-kicker {
-  color: var(--md-accent-fg-color);
+  color: var(--plantain-gold);
   font-size: 0.72rem;
   font-weight: 750;
   letter-spacing: 0.14em;
@@ -96,13 +101,15 @@
 }
 
 .md-typeset .md-button--primary {
-  background-color: var(--plantain-blue);
-  border-color: var(--plantain-blue);
+  background-color: var(--md-accent-fg-color);
+  border-color: var(--md-accent-fg-color);
+  color: var(--md-default-bg-color);
 }
 
 .md-typeset .md-button--primary:hover {
   background-color: var(--plantain-blue-dark);
   border-color: var(--plantain-blue-dark);
+  color: var(--plantain-white);
 }
 
 .md-typeset .grid.cards > ul > li {
