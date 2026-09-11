@@ -15,7 +15,6 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  UV_FROZEN: "1"
   UV_NO_PROGRESS: "1"
 
 jobs:
@@ -189,3 +188,4 @@ jobs:
 
       - name: Run supported-platform unit tests
         run: uv run --locked --all-extras pytest -q -p no:cacheprovider tests/unit
+vider tests/unit
