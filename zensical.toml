@@ -66,6 +66,7 @@ features = [
   "content.tabs.link",
 ]
 
+[[project.theme.palette]]
 media = "(prefers-color-scheme: light)"
 scheme = "default"
 primary = "blue"
@@ -76,8 +77,8 @@ toggle.name = "Switch to dark mode"
 [[project.theme.palette]]
 media = "(prefers-color-scheme: dark)"
 scheme = "slate"
-primary = "blue"
-accent = "blue"
+primary = "blue"            
+accent = "light-blue"
 toggle.icon = "lucide/moon"
 toggle.name = "Switch to light mode"
 

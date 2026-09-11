@@ -28,6 +28,10 @@ Read the root instructions first.
 - One admission controller owns scenario, browser, API, database, thread, and process budgets.
   Cancellation never releases a permit before the underlying resource exits; process work is
   terminated and joined, while cooperative filesystem transactions are signaled and drained.
+- Spawned workers use the configured memory budget as an absolute address-space ceiling on
+  supported non-Darwin Unix systems. Darwin workers derive and immediately restore the smallest
+  accepted page-aligned address-space baseline before sealing a hard ceiling at that baseline plus
+  the configured budget; never skip the bound because inherited interpreter mappings exceed it.
 - Expression resolution observes classified environment-derived values in the scenario secret
   registry before they can enter logs or reports. Internal byte and context-path ceilings remain
   generous and require no additional scenario configuration.

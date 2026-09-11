@@ -65,6 +65,10 @@ operations, worker threads, and worker processes. Cancellation retains a permit 
 underlying thread or process exits; killable process workers are terminated and joined first.
 Batch execution is explicitly non-reentrant on each runner. Existing time, memory, work, and
 connection controls have generous hard maxima without adding configuration.
+On Darwin, a worker derives the smallest accepted page-aligned address-space baseline with
+immediately restored soft-limit probes, then seals the hard ceiling to that baseline plus the
+configured memory budget. Resource-limit setup failures cross IPC as type-only errors rather than
+secondary result-channel failures.
 
 ## Public activity boundary
 

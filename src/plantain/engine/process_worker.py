@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import multiprocessing
 import os
+import sys
 import time
 from collections.abc import Callable
 from contextlib import suppress
@@ -26,6 +27,16 @@ class _ManagedProcess(Protocol):
     def terminate(self) -> None: ...
 
     def kill(self) -> None: ...
+
+
+class _AddressSpaceResource(Protocol):
+    RLIMIT_AS: int
+
+    def getpagesize(self) -> int: ...
+
+    def getrlimit(self, resource: int) -> tuple[int, int]: ...
+
+    def setrlimit(self, resource: int, limits: tuple[int, int]) -> None: ...
 
 
 class ProcessWorkerError(RuntimeError):
@@ -152,8 +163,8 @@ def _child_main(
     limits: ProcessLimits,
 ) -> None:
     try:
-        _apply_child_limits(limits)
         try:
+            _apply_child_limits(limits)
             envelope: tuple[str, Any] = ("result", function(*args, **kwargs))
         except Exception as exc:  # noqa: BLE001 - only the exception type crosses IPC.
             envelope = ("error", type(exc).__name__[:_MAX_FAILURE_TYPE_LENGTH])
@@ -175,10 +186,96 @@ def _apply_child_limits(limits: ProcessLimits) -> None:
         resource.RLIMIT_CPU,
         (limits.cpu_timeout_seconds, limits.cpu_timeout_seconds),
     )
-    resource.setrlimit(
-        resource.RLIMIT_AS,
-        (limits.memory_bytes, limits.memory_bytes),
+    _apply_address_space_limit(
+        cast("_AddressSpaceResource", resource),
+        limits.memory_bytes,
+        platform=sys.platform,
     )
+
+
+def _apply_address_space_limit(
+    resource_module: _AddressSpaceResource,
+    memory_bytes: int,
+    *,
+    platform: str,
+) -> None:
+    if platform != "darwin":
+        resource_module.setrlimit(
+            resource_module.RLIMIT_AS,
+            (memory_bytes, memory_bytes),
+        )
+        return
+
+    original_limits = resource_module.getrlimit(resource_module.RLIMIT_AS)
+    page_bytes = resource_module.getpagesize()
+    if page_bytes < 1:
+        raise RuntimeError("ProcessResourceLimitsUnavailable")
+    baseline_bytes = _darwin_address_space_floor(
+        resource_module,
+        original_limits=original_limits,
+        page_bytes=page_bytes,
+    )
+    ceiling_bytes = min(baseline_bytes + memory_bytes, original_limits[1])
+    if ceiling_bytes < baseline_bytes:
+        raise RuntimeError("ProcessResourceLimitsUnavailable")
+    resource_module.setrlimit(
+        resource_module.RLIMIT_AS,
+        (ceiling_bytes, ceiling_bytes),
+    )
+
+
+def _darwin_address_space_floor(
+    resource_module: _AddressSpaceResource,
+    *,
+    original_limits: tuple[int, int],
+    page_bytes: int,
+) -> int:
+    hard_bytes = original_limits[1]
+    if hard_bytes < page_bytes:
+        raise RuntimeError("ProcessResourceLimitsUnavailable")
+
+    rejected_bytes = 0
+    accepted_bytes = page_bytes
+    while not _darwin_limit_is_accepted(
+        resource_module,
+        candidate_bytes=accepted_bytes,
+        original_limits=original_limits,
+    ):
+        rejected_bytes = accepted_bytes
+        accepted_bytes = min(accepted_bytes * 2, hard_bytes)
+        if accepted_bytes <= rejected_bytes:
+            raise RuntimeError("ProcessResourceLimitsUnavailable")
+
+    while accepted_bytes - rejected_bytes > page_bytes:
+        candidate_bytes = (((accepted_bytes + rejected_bytes) // 2) // page_bytes) * page_bytes
+        if candidate_bytes <= rejected_bytes:
+            break
+        if _darwin_limit_is_accepted(
+            resource_module,
+            candidate_bytes=candidate_bytes,
+            original_limits=original_limits,
+        ):
+            accepted_bytes = candidate_bytes
+        else:
+            rejected_bytes = candidate_bytes
+    return accepted_bytes
+
+
+def _darwin_limit_is_accepted(
+    resource_module: _AddressSpaceResource,
+    *,
+    candidate_bytes: int,
+    original_limits: tuple[int, int],
+) -> bool:
+    try:
+        resource_module.setrlimit(
+            resource_module.RLIMIT_AS,
+            (candidate_bytes, original_limits[1]),
+        )
+    except ValueError:
+        return False
+    resource_module.setrlimit(resource_module.RLIMIT_AS, original_limits)
+    return True
 
 
 def _stop_process(process: _ManagedProcess) -> None:
@@ -198,5 +295,3 @@ __all__ = [
     "ProcessWorkerTimeoutError",
     "run_process_worker",
 ]
-# Export names are explicit so worker internals remain private.
-# End of process worker module.
