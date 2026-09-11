@@ -1,0 +1,7 @@
+interface:
+  display_name: "Identify Critical Test Space"
+  short_description: "Derive minimal high-value coverage from evidence"
+  default_prompt: "Use $identify-critical-decision-space to turn my captured UI states into a focused test plan."
+policy:
+  allow_implicit_invocation: true
+

@@ -1,0 +1,17 @@
+scenario: "SauceDemo - Discover Login"
+JiraTicket: N/A
+tags:
+  - discovery
+  - saucedemo
+
+steps:
+  - capturePageSnapshot:
+      # Discovery remains complete across the page and all discoverable frames.
+      id: capture_login
+      activity: sauce_demo_login
+      url: "env:SAUCE_DEMO_URL"
+
+outputs:
+  loginUrl: "${capture_login.url}"
+  loginTitle: "${capture_login.pageTitle}"
+  canonicalSnapshot: "${capture_login.snapshots[0].canonicalFile}"

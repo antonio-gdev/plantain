@@ -1,0 +1,4 @@
+# One non-secret field name per line. Matching is case-insensitive.
+# Exact structured keys are masked. Any string containing a listed name is masked in full.
+FIRST_PASSWORD
+SECOND_PASSWORD

@@ -1,0 +1,28 @@
+scenario: "Petstore - Get Inventory With API Key"
+tags:
+  - api
+  - petstore
+  - schema
+  - positive
+  - read-only
+
+steps:
+  - loadApiSchema:
+      id: petstore_schema
+      schemaUrl: "env:PETSTORE_SCHEMA_URL"
+
+  - callSchema:
+      id: get_inventory
+      schemaId: "${petstore_schema.schemaId}"
+      operationId: getInventory
+      headers:
+        Accept: application/json
+        api_key: "env:PETSTORE_API_KEY"
+      expectedStatus: 200
+      validateRequest: true
+      validateResponse: true
+
+outputs:
+  schemaId: "${petstore_schema.schemaId}"
+  statusCode: "${get_inventory.statusCode}"
+  responseBytes: "${get_inventory.responseBytes}"

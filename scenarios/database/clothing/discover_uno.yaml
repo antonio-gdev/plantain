@@ -1,0 +1,41 @@
+# Reference artifact: ordinary testers can ask $discover-database a plain-language question.
+scenario: "CLOTHING - Discover Brands Uno Metadata"
+tags:
+  - database
+  - clothing
+  - discovery
+  - read-only
+  - reference
+
+steps:
+  - discoverDatabase:
+      id: discover_schemas
+      source:
+        username: "env:APP_DB_USERNAME"
+        password: "env:APP_DB_PASSWORD"
+        dbUrl: "env:APP_DB_URL"
+      phase: schemas
+
+  - discoverDatabase:
+      id: discover_brand_tables
+      source:
+        username: "env:APP_DB_USERNAME"
+        password: "env:APP_DB_PASSWORD"
+        dbUrl: "env:APP_DB_URL"
+      phase: tables
+      schema: "Brands"
+
+  - discoverDatabase:
+      id: discover_uno
+      source:
+        username: "env:APP_DB_USERNAME"
+        password: "env:APP_DB_PASSWORD"
+        dbUrl: "env:APP_DB_URL"
+      phase: table
+      schema: "Brands"
+      table: "Uno"
+
+outputs:
+  dialect: "${discover_uno.dialect}"
+  schema: "${discover_uno.schema}"
+  tableMetadata: "${discover_uno.tableMetadata}"

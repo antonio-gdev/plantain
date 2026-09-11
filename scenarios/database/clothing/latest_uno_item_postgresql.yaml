@@ -1,0 +1,46 @@
+# Reference artifact generated only after reflection proves PostgreSQL and these identifiers.
+scenario: "CLOTHING - Latest Uno Item And Price - PostgreSQL"
+tags:
+  - database
+  - clothing
+  - query
+  - postgresql
+  - read-only
+  - reference
+
+steps:
+  - discoverDatabase:
+      id: discover_uno
+      source:
+        username: "env:APP_DB_USERNAME"
+        password: "env:APP_DB_PASSWORD"
+        dbUrl: "env:APP_DB_URL"
+      phase: table
+      schema: "Brands"
+      table: "Uno"
+
+  - verifyDatabaseResult:
+      id: verify_postgresql_dialect
+      actual: "${discover_uno.dialect}"
+      expected: postgresql
+      matchMode: exact
+
+  - queryDatabase:
+      id: latest_uno_item
+      source:
+        username: "env:APP_DB_USERNAME"
+        password: "env:APP_DB_PASSWORD"
+        dbUrl: "env:APP_DB_URL"
+      sql: |-
+        SELECT "Item", "Price", "Date"
+        FROM "Brands"."Uno"
+        WHERE "Date" IS NOT NULL
+        ORDER BY "Date" DESC, "Item" ASC
+        LIMIT 1
+      resultMode: row
+
+outputs:
+  dialect: "${discover_uno.dialect}"
+  latestItem: "${latest_uno_item.result}"
+  rowCount: "${latest_uno_item.rowCount}"
+  truncated: "${latest_uno_item.truncated}"

@@ -1,0 +1,7 @@
+interface:
+  display_name: "Discover Database"
+  short_description: "Answer database questions through read-only discovery"
+  default_prompt: "Use $discover-database to answer my database question through scoped read-only discovery."
+policy:
+  allow_implicit_invocation: true
+

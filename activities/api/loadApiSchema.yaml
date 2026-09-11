@@ -1,0 +1,52 @@
+activity: loadApiSchema
+summary: Download, validate, and content-address a Swagger 2 or OpenAPI 3 document.
+networkBehavior: Conditional GET for public schemas; authenticated downloads always fetch a full representation.
+parameters:
+  id:
+    type: string
+    required: true
+    description: Unique scenario step identifier.
+  schemaUrl:
+    type: string
+    required: true
+    description: Absolute HTTP(S) schema URL or an env:VARIABLE_NAME reference.
+  headers:
+    type: mapping of string to string
+    default: {}
+    description: Schema-download headers only; use env:VARIABLE_NAME for credential values.
+result:
+  success: boolean
+  schemaId: lowercase SHA-256 digest
+  schemaVersion: Swagger or OpenAPI version
+  sourceUrl: sanitized source URL
+  baseUrl: sanitized resolved API base URL
+  cacheFile: project-relative canonical schema artifact
+  operations:
+    type: list
+    fields:
+      operationId: string or null
+      method: HTTP method
+      path: schema path template
+      summary: string or null
+operationTrace:
+  target: Sanitized schema URL.
+  input: Bounded sanitized schema-download headers.
+  expected: A supported, bounded Swagger 2 or OpenAPI 3 document.
+  actual: Schema identifier, schema version, and discovered operation count.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Header secrets and parsed schema content are never copied into the operation trace.
+    - Failures before normal execution begins retain only a minimal sanitized prepare record.
+security:
+  - Credentials embedded in URLs are rejected.
+  - Private, local, reserved, or non-allowlisted targets are rejected by default.
+  - External schema references are currently rejected.
+  - The response and parsed document are bounded before persistence.
+  - Cache indexes and documents use descriptor-bound private reads without following symbolic links.
+  - Custom header values and their hashes are never persisted in the schema cache.
+  - The first declared server is resolved deterministically; its target is still subject to URL and DNS policy.
+  - If-None-Match and If-Modified-Since are runtime-managed and cannot be supplied.
+example:
+  loadApiSchema:
+    id: petstore_schema
+    schemaUrl: "env:PETSTORE_SCHEMA_URL"

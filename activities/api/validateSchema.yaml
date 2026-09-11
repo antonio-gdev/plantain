@@ -1,0 +1,75 @@
+activity: validateSchema
+summary: Validate a stored response body against one Swagger/OpenAPI operation response.
+parameters:
+  id:
+    type: string
+    required: true
+  schemaUrl:
+    type: string
+    required: conditionally
+    description: Use exactly one of schemaUrl or schemaId.
+  schemaId:
+    type: 64-character lowercase SHA-256 digest
+    required: conditionally
+  schemaHeaders:
+    type: mapping of string to string
+    default: {}
+    description: Applied only while loading schemaUrl; prohibited when schemaId is used.
+  operationId:
+    type: string
+    required: conditionally
+    description: Use operationId or the path and method pair.
+  path:
+    type: string
+    required: conditionally
+  method:
+    type: GET, HEAD, OPTIONS, POST, PUT, PATCH, or DELETE
+    required: conditionally
+  statusCode:
+    type: integer from 100 through 599
+    required: true
+  contentType:
+    type: string or null
+    default: null
+    description: Actual response media type; required when the selected response declares multiple content schemas.
+  body:
+    type: any YAML value
+    required: true
+  expectedValid:
+    type: boolean
+    default: true
+    description: Set false only when asserting that observed data violates the selected contract.
+result:
+  success: boolean
+  schemaId: lowercase SHA-256 digest
+  operationId: string or null
+  method: HTTP method
+  path: schema path template
+  statusCode: validated integer status
+  expectedValid: asserted boolean
+  schemaValid: observed boolean
+  schemaPath: first failing instance path or null
+  schemaRule: first failing JSON Schema rule or null
+operationTrace:
+  target: Selected HTTP method and schema path.
+  input: Observed status plus a bounded sanitized response-body value.
+  expected: Whether the body is expected to satisfy the selected response schema.
+  actual: Observed validity, status, and value-free schema path/rule evidence.
+  behavior:
+    - Started, passed, and failed lifecycle records are emitted automatically; no telemetry fields are added to scenario YAML.
+    - Rejected values and complete response bodies are never copied into the operation trace.
+    - Failures before normal execution begins retain only a minimal sanitized prepare record.
+security:
+  - Validation errors identify schema paths and rules but never rejected values.
+  - Only local schema references are resolved.
+  - Cached schemas use descriptor-bound private reads without following symbolic links.
+  - Unsupported or ambiguous media-type and response-header contracts fail closed.
+  - An expected-invalid assertion passes only for an actual instance conformance failure.
+example:
+  validateSchema:
+    id: validate_available
+    schemaId: "${petstore_schema.schemaId}"
+    operationId: findPetsByStatus
+    statusCode: "${find_available.statusCode}"
+    body: "${find_available.responseBody}"
+    expectedValid: false
