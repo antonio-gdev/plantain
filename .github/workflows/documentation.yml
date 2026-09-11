@@ -15,7 +15,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  UV_FROZEN: "1"
   UV_NO_PROGRESS: "1"
 
 jobs:
