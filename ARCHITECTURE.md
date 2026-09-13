@@ -11,19 +11,13 @@ relational-database testing. A tester supplies plain-language intent; an agent d
 evidence it needs, writes reviewable YAML, and runs that YAML through eight generalized internal
 activities.
 
-The design removes application-specific screen classes, flow classes, endpoint builders, generated
-schema models, and database query builders. Typed YAML is the maintained automation surface.
-
 ## Design priorities
 
 1. Security boundaries fail closed.
 2. Live discovery replaces guessed UI locators, API contracts, and database identifiers.
-3. Scenario state is isolated while expensive transports and pools are shared only by an owning
-   run.
-4. Inputs, outputs, logs, and persistence are explicitly bounded where completeness is not the
-   purpose.
-5. Semantic UI capture preserves the complete discoverable layout; chunking provides transport
-   bounds without imposing a total-content limit.
+3. Scenario state is isolated while expensive transports and pools are shared only by an owning run.
+4. Inputs, outputs, logs, and persistence are explicitly bounded where completeness is not the purpose.
+5. Semantic UI capture preserves the complete discoverable layout; chunking provides transport bounds without imposing a total-content limit.
 6. Internal services remain replaceable without expanding the public activity surface.
 
 ## Execution model
@@ -197,7 +191,7 @@ filtering rather than a first-N Python scan. Locator frame paths have no separat
 and action/assertion lists rely on the YAML document budgets and scenario deadline instead of a
 duplicated public count limit.
 
-Registry v4 uses a top-level `entries` array. Each structural-state entry separates verified
+Registry uses a top-level `entries` array. Each structural-state entry separates verified
 aliases under `activities` from failed-intent records under `diagnostics`; diagnostics resolve only
 by exact filename. Runtime resolution holds the process-shared registry lock while requiring
 registry schema 4.0, complete manifest schema 3.0, matching entry metadata, contained non-symlink
