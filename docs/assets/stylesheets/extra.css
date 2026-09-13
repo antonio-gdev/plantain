@@ -16,7 +16,7 @@
   --md-default-bg-color: var(--plantain-warm-bg);
   --md-default-fg-color: var(--plantain-charcoal);
   --md-default-fg-color--light: #5f6368;
-  --md-primary-fg-color: var(--plantain-blue);
+  --md-primary-fg-color: var(--plantain-warm-bg);
   --md-primary-fg-color--light: var(--plantain-blue-dark);
   --md-primary-fg-color--dark: var(--plantain-blue-dark);
   --md-typeset-h1-color: var(--plantain-charcoal);
